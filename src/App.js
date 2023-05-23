@@ -13,17 +13,28 @@ function App() {
   const [snake, setSnake] = useState(INITIAL_SNAKE);
   const [direction, setDirection] = useState("up");
   const [fruit, setFruit] = useState(INITIAL_FRUIT);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
 
   useEffect(() => {
+    if (!gameStarted || gameOver) {
+      return;
+    }
+
     const interval = setInterval(moveSnake, 100);
     document.addEventListener("keydown", handleKeyDown);
+
     return () => {
       clearInterval(interval);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [snake]);
+  }, [snake, gameStarted, gameOver]);
 
   const moveSnake = () => {
+    if (gameOver) {
+      return;
+    }
+
     const head = { ...snake[0] };
     switch (direction) {
       case "up":
@@ -53,6 +64,7 @@ function App() {
       setSnake(INITIAL_SNAKE);
       setDirection("up");
       setFruit(INITIAL_FRUIT);
+      setGameOver(true);
       return;
     }
 
@@ -87,8 +99,28 @@ function App() {
     return { x, y };
   };
 
+  const startGame = () => {
+    setSnake(INITIAL_SNAKE);
+    setDirection("up");
+    setFruit(INITIAL_FRUIT);
+    setGameStarted(true);
+    setGameOver(false);
+  };
+
+  const restartGame = () => {
+    setSnake(INITIAL_SNAKE);
+    setDirection("up");
+    setFruit(INITIAL_FRUIT);
+    setGameOver(false);
+    setGameStarted(true); // Agregar esta línea
+  };
+
   return (
-    <div className="App" onKeyDown={handleKeyDown} tabIndex="0">
+    <div
+      className="App"
+      tabIndex="0"
+      onKeyDown={gameStarted ? handleKeyDown : null}
+    >
       <div className="game-board">
         {Array(BOARD_SIZE)
           .fill(0)
@@ -109,6 +141,10 @@ function App() {
               ))
           )}
       </div>
+      {!gameStarted && !gameOver && (
+        <button onClick={startGame}>Comenzar partida</button>
+      )}
+      {gameOver && <button onClick={restartGame}>Reiniciar partida</button>}
     </div>
   );
 }
