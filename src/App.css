@@ -1,0 +1,22 @@
+.App {
+  text-align: center;
+}
+
+.game-board {
+  display: grid;
+  grid-template-columns: repeat(20, 20px);
+  grid-template-rows: repeat(20, 20px);
+  width: 400px;
+  height: 400px;
+  margin: 0 auto;
+  border: 1px solid #ccc;
+}
+
+.cell {
+  background-color: #f7f7f7;
+  border: 1px solid #ccc;
+}
+
+.snake {
+  background-color: #333;
+}
