@@ -7,10 +7,12 @@ const INITIAL_SNAKE = [
   { x: 10, y: 11 },
   { x: 10, y: 12 },
 ];
+const INITIAL_FRUIT = { x: 5, y: 5 };
 
 function App() {
   const [snake, setSnake] = useState(INITIAL_SNAKE);
   const [direction, setDirection] = useState("up");
+  const [fruit, setFruit] = useState(INITIAL_FRUIT);
 
   useEffect(() => {
     const interval = setInterval(moveSnake, 100);
@@ -39,8 +41,8 @@ function App() {
       default:
         break;
     }
-    setSnake([head, ...snake.slice(0, snake.length - 1)]);
 
+    // Verificar colisiones con los bordes del tablero
     if (
       head.x < 0 ||
       head.x >= BOARD_SIZE ||
@@ -50,10 +52,20 @@ function App() {
       // Reiniciar el juego
       setSnake(INITIAL_SNAKE);
       setDirection("up");
+      setFruit(INITIAL_FRUIT);
       return;
     }
 
-    setSnake([head, ...snake.slice(0, snake.length - 1)]);
+    // Verificar colisiones con la fruta
+    if (head.x === fruit.x && head.y === fruit.y) {
+      // Incrementar la longitud de la serpiente y generar una nueva fruta
+      const newSnake = [head, ...snake];
+      setSnake(newSnake);
+      setFruit(generateRandomFruit());
+    } else {
+      // Mover la serpiente
+      setSnake([head, ...snake.slice(0, snake.length - 1)]);
+    }
   };
 
   const handleKeyDown = (event) => {
@@ -67,6 +79,12 @@ function App() {
     } else if (key === 39 && direction !== "left") {
       setDirection("right");
     }
+  };
+
+  const generateRandomFruit = () => {
+    const x = Math.floor(Math.random() * BOARD_SIZE);
+    const y = Math.floor(Math.random() * BOARD_SIZE);
+    return { x, y };
   };
 
   return (
@@ -83,6 +101,8 @@ function App() {
                   className={`cell ${
                     snake.find((cell) => cell.x === col && cell.y === row)
                       ? "snake"
+                      : fruit.x === col && fruit.y === row
+                      ? "fruit"
                       : ""
                   }`}
                 />
