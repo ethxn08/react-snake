@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
+import Board from "./components/Board";
+import Button from "./components/Button";
 
 const BOARD_SIZE = 20;
 const INITIAL_SNAKE = [
@@ -8,13 +10,16 @@ const INITIAL_SNAKE = [
   { x: 10, y: 12 },
 ];
 const INITIAL_FRUIT = { x: 5, y: 5 };
+const MAX_SCORE = 10;
 
-function App() {
+const App = () => {
   const [snake, setSnake] = useState(INITIAL_SNAKE);
   const [direction, setDirection] = useState("up");
   const [fruit, setFruit] = useState(INITIAL_FRUIT);
+  const [fruitColor, setFruitColor] = useState("#ff6347");
   const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [score, setScore] = useState(0);
 
   useEffect(() => {
     if (!gameStarted || gameOver) {
@@ -30,12 +35,18 @@ function App() {
     };
   }, [snake, gameStarted, gameOver]);
 
+  useEffect(() => {
+    const randomColor = generateRandomColor();
+    setFruitColor(randomColor);
+  }, [fruit]);
+
   const moveSnake = () => {
     if (gameOver) {
       return;
     }
 
     const head = { ...snake[0] };
+
     switch (direction) {
       case "up":
         head.y -= 1;
@@ -53,29 +64,26 @@ function App() {
         break;
     }
 
-    // Verificar colisiones con los bordes del tablero
     if (
       head.x < 0 ||
       head.x >= BOARD_SIZE ||
       head.y < 0 ||
       head.y >= BOARD_SIZE
     ) {
-      // Reiniciar el juego
       setSnake(INITIAL_SNAKE);
       setDirection("up");
       setFruit(INITIAL_FRUIT);
       setGameOver(true);
+      setScore(0);
       return;
     }
 
-    // Verificar colisiones con la fruta
     if (head.x === fruit.x && head.y === fruit.y) {
-      // Incrementar la longitud de la serpiente y generar una nueva fruta
       const newSnake = [head, ...snake];
       setSnake(newSnake);
       setFruit(generateRandomFruit());
+      setScore(score + 1); // Incrementar el puntaje en 1
     } else {
-      // Mover la serpiente
       setSnake([head, ...snake.slice(0, snake.length - 1)]);
     }
   };
@@ -99,12 +107,22 @@ function App() {
     return { x, y };
   };
 
+  const generateRandomColor = () => {
+    const letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
   const startGame = () => {
     setSnake(INITIAL_SNAKE);
     setDirection("up");
     setFruit(INITIAL_FRUIT);
     setGameStarted(true);
     setGameOver(false);
+    setScore(0); // Reiniciar el puntaje al comenzar el juego
   };
 
   const restartGame = () => {
@@ -112,7 +130,8 @@ function App() {
     setDirection("up");
     setFruit(INITIAL_FRUIT);
     setGameOver(false);
-    setGameStarted(true); // Agregar esta línea
+    setGameStarted(true);
+    setScore(0); // Reiniciar el puntaje al reiniciar el juego
   };
 
   return (
@@ -121,32 +140,16 @@ function App() {
       tabIndex="0"
       onKeyDown={gameStarted ? handleKeyDown : null}
     >
-      <div className="game-board">
-        {Array(BOARD_SIZE)
-          .fill(0)
-          .map((_, row) =>
-            Array(BOARD_SIZE)
-              .fill(0)
-              .map((_, col) => (
-                <div
-                  key={`${row}-${col}`}
-                  className={`cell ${
-                    snake.find((cell) => cell.x === col && cell.y === row)
-                      ? "snake"
-                      : fruit.x === col && fruit.y === row
-                      ? "fruit"
-                      : ""
-                  }`}
-                />
-              ))
-          )}
-      </div>
+      <Board snake={snake} fruit={fruit} fruitColor={fruitColor} />
+      <div className="score">Puntaje: {score}</div> {/* Mostrar el puntaje */}
       {!gameStarted && !gameOver && (
-        <button onClick={startGame}>Comenzar partida</button>
+        <Button text="Comenzar partida" onClick={startGame} />
       )}
-      {gameOver && <button onClick={restartGame}>Reiniciar partida</button>}
+      {gameOver && <Button text="Reiniciar partida" onClick={restartGame} />}
+      {score === MAX_SCORE && <div className="message">¡Has ganado!</div>}{" "}
+      {/* Mostrar un mensaje de "¡Has ganado!" cuando se alcanza la puntuación máxima */}
     </div>
   );
-}
+};
 
 export default App;

@@ -3,6 +3,8 @@
 }
 
 .game-board {
+  margin-top: 120px !important;
+  margin-bottom: 120px !important;
   display: grid;
   grid-template-columns: repeat(20, 20px);
   grid-template-rows: repeat(20, 20px);
@@ -13,12 +15,12 @@
 }
 
 .cell {
-  background-color: #f7f7f7;
-  border: 1px solid #ccc;
+  background-color: #221c10;
 }
 
 .snake {
-  background-color: #333;
+  background-color: #499e3e;
+  border: 1px solid #33692c;
 }
 .fruit {
   background-color: #ff6347;
